@@ -4,7 +4,7 @@ library(dplyr)
 library(readxl)
 library(magrittr)
 
-dt <- read_excel("tasutud_maksud_05.07.2017.xlsx")
+dt <- read_excel("data/tasutud_maksud_05.07.2017.xlsx")
 
 server <- function(input, output, session)  {
   updateSelectizeInput(session, "Firma1",
@@ -49,12 +49,13 @@ server <- function(input, output, session)  {
                                              pageLength = 12,
                                              autoWidth = FALSE,
                                              columnDefs = list(list(width = "400px", targets = "_all"))),
-                  rownames = FALSE) %>% formatStyle(" ", fontWeight = "bold")
+                  rownames = FALSE) %>% formatStyle(" ", fontWeight = "bold") #%>%
+      #formatCurrency(c(2:4), currency = "", interval = 3, mark = " ") ei toimi, sest stringid veerus.
   })
 }
 
 ui <- fluidPage(
-  mainPanel(
+  mainPanel(width = 12,
     fluidRow(
       column(3, offset = 3, selectizeInput("Firma1", "", choices = NULL, options = list(placeholder = "Ettevõtte nimi"))),
       column(3, selectizeInput("Firma2", "", choices = NULL, options = list(placeholder = "Ettevõtte nimi"))),
@@ -63,7 +64,7 @@ ui <- fluidPage(
     fluidRow(column(12, DT::dataTableOutput("compare_table")
     )),
     tags$div(class = "header", checked = NA,
-             tags$p("Tabel on tehtud EMTA väljastatud kvartaalsete andmete pealt. Kasutatakse II kv 2017. a andmeid, mis asuvad",
+             tags$p("Tabel on tehtud EMTA väljastatud kvartaalsete andmete pealt. Kasutatakse märts, aprill, mai 2017. a andmeid, mis asuvad",
              tags$a(href = "http://www.emta.ee/et/kontaktid-ja-ametist/maksulaekumine-statistika/tasutud-maksud-kaive-ja-tootajate-arv", "siin.")),
              tags$p("*Deklareeritud käibena avaldatakse käibedeklaratsioonide ridade 1, 2 ja 3 summa."),
              tags$p("**Töötajate arv on möödunud kvartali viimase kuupäeva seisuga töötamise registrisse kantud kehtiva kandega tööd tegevate isikute arv, tööjõumaksud on kvartali jooksul kassapõhiselt tasutud summa. Seega ei ole töötajate arv ja tööjõumaksud kvartalis üks ühele võrreldavad.")
