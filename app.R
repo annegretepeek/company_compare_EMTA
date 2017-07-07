@@ -4,7 +4,7 @@ library(dplyr)
 library(readxl)
 library(magrittr)
 
-dt <- read_excel("data/tasutud_maksud_05.07.2017.xlsx")
+dt <- read_excel("tasutud_maksud_05.07.2017.xlsx")
 
 server <- function(input, output, session)  {
   updateSelectizeInput(session, "Firma1",
@@ -18,8 +18,8 @@ server <- function(input, output, session)  {
   names(empty_row) <- names(dt)
   dt <- rbind(dt, empty_row)
   names(dt)[c(4,5,9,10)] <- c("Käibemaksukohuslane", "Tegevusvaldkond", "Käive*", "Töötajate arv**")
-  dt$`Riiklikud maksud käivest (%)` <- dt$`Riiklikud Maksud`/dt$`Käive*`*100
-  dt$`Tööjõumaksud käivest (%)` <- dt$`Tööjõumaksud Ja Maksed`/dt$`Käive*`*100
+  dt$`Riiklikud maksud käibest (%)` <- dt$`Riiklikud Maksud`/dt$`Käive*`*100
+  dt$`Tööjõumaksud käibest (%)` <- dt$`Tööjõumaksud Ja Maksed`/dt$`Käive*`*100
   dt$`Käive töötaja kohta` <- dt$`Käive*`/dt$`Töötajate arv**`
   dt$`Tööjõumaksud töötaja kohta` <- dt$`Tööjõumaksud Ja Maksed`/dt$`Töötajate arv**`
   dt[,c(7:14)] <- round(dt[,c(7:14)])
@@ -49,8 +49,7 @@ server <- function(input, output, session)  {
                                              pageLength = 12,
                                              autoWidth = FALSE,
                                              columnDefs = list(list(width = "400px", targets = "_all"))),
-                  rownames = FALSE) %>% formatStyle(" ", fontWeight = "bold") #%>%
-      #formatCurrency(c(2:4), currency = "", interval = 3, mark = " ") ei toimi, sest stringid veerus.
+                  rownames = FALSE) %>% formatStyle(" ", fontWeight = "bold")
   })
 }
 
