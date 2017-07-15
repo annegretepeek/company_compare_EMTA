@@ -37,7 +37,11 @@ server <- function(input, output, session)  {
     if (input$Firma3 != "") {
       n3 <- which(dt$Nimi == input$Firma3)
     }
-    abi <- t(dt[c(n1,n2,n3),c(3:14)])
+    abi <- dt[c(n1,n2,n3),c(3:14)] 
+    abi[,c(5:12)] <- lapply(abi[,c(5:12)],FUN = function(x){c(prettyNum(x, format = "d", big.mark = " "))})
+    abi[] <- lapply(abi, as.character)
+    abi[abi == "NA"] <- ""
+    abi <- t(abi)
     abi <- data.frame(row.names(abi), abi)
     colnames(abi) <- c(" ", input$Firma1, input$Firma2, input$Firma3)
     return(abi)
@@ -53,7 +57,7 @@ server <- function(input, output, session)  {
   })
 }
 
-ui <- fluidPage(
+ui <- fluidPage(theme = "bootstrap.css",
   mainPanel(width = 12,
     fluidRow(
       column(3, offset = 3, selectizeInput("Firma1", "", choices = NULL, options = list(placeholder = "Ettevõtte nimi"))),
