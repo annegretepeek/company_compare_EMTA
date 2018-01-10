@@ -17,20 +17,22 @@ parandus <- function(string){
 }
 
 server <- function(input, output, session)  {
-  updateSelectizeInput(session, "Firma1", choices = dt$Nimi, server = TRUE)
-  updateSelectizeInput(session, "Firma2", choices = dt$Nimi, server = TRUE)
-  updateSelectizeInput(session, "Firma3", choices = dt$Nimi, server = TRUE)
+  firma1 <- NULL
+  firma2 <- NULL
+  firma3 <- NULL
   
-  onRestored(function(url) {
-    firma1 <- parandus(url$input$Firma1)
-    firma2 <- parandus(url$input$Firma2)
-    firma3 <- parandus(url$input$Firma3)
-    
-    updateSelectizeInput(session, "Firma1", selected = firma1, choices = dt$Nimi, server = TRUE)
-    updateSelectizeInput(session, "Firma2", selected = firma2, choices = dt$Nimi, server = TRUE)
-    updateSelectizeInput(session, "Firma3", selected = firma3, choices = dt$Nimi, server = TRUE)
+  onRestore(function(url) {
+    firma1 <<- parandus(url$input$Firma1)
+    firma2 <<- parandus(url$input$Firma2)
+    firma3 <<- parandus(url$input$Firma3)
   })
   
+  observe({
+    updateSelectizeInput(session, "Firma1", choices = dt$Nimi, selected = firma1, server = TRUE)
+    updateSelectizeInput(session, "Firma2", choices = dt$Nimi, selected = firma2, server = TRUE)
+    updateSelectizeInput(session, "Firma3", choices = dt$Nimi, selected = firma3, server = TRUE)
+  })
+
   empty_row <- data.frame(matrix(nrow = 1, ncol = ncol(dt)))
   names(empty_row) <- names(dt)
   dt <- rbind(dt, empty_row)
