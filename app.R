@@ -20,13 +20,13 @@ server <- function(input, output, session)  {
   firma1 <- NULL
   firma2 <- NULL
   firma3 <- NULL
-  
+
   onRestore(function(url) {
     firma1 <<- parandus(url$input$Firma1)
     firma2 <<- parandus(url$input$Firma2)
     firma3 <<- parandus(url$input$Firma3)
   })
-  
+
   observe({
     updateSelectizeInput(session, "Firma1", choices = dt$Nimi, selected = firma1, server = TRUE)
     updateSelectizeInput(session, "Firma2", choices = dt$Nimi, selected = firma2, server = TRUE)
@@ -42,7 +42,7 @@ server <- function(input, output, session)  {
   dt$`Käive töötaja kohta` <- dt$`Käive*`/dt$`Töötajate arv**`
   dt$`Tööjõumaksud töötaja kohta` <- dt$`Tööjõumaksud Ja Maksed`/dt$`Töötajate arv**`
   dt[,c(7:14)] <- round(dt[,c(7:14)])
-  
+
   table_dt <- reactive({
     n1 <- dim(dt)[1]
     n2 <- n1
@@ -56,7 +56,7 @@ server <- function(input, output, session)  {
     if (input$Firma3 != "") {
       n3 <- which(dt$Nimi == input$Firma3)
     }
-    abi <- dt[c(n1,n2,n3),c(3:14)] 
+    abi <- dt[c(n1,n2,n3),c(3:14)]
     abi[,c(5:12)] <- lapply(abi[,c(5:12)],FUN = function(x){c(prettyNum(x, format = "d", big.mark = " "))})
     abi[] <- lapply(abi, as.character)
     abi[abi == "NA"] <- ""
@@ -65,7 +65,7 @@ server <- function(input, output, session)  {
     colnames(abi) <- c(" ", input$Firma1, input$Firma2, input$Firma3)
     return(abi)
   })
-  
+
   output$compare_table <- DT::renderDataTable({
     DT::datatable(table_dt(), options = list(dom = 't',
                                              ordering = FALSE,
@@ -74,7 +74,7 @@ server <- function(input, output, session)  {
                                              columnDefs = list(list(width = "400px", targets = "_all"))),
                   rownames = FALSE) %>% formatStyle(" ", fontWeight = "bold")
   })
-  
+
   setBookmarkExclude(c("compare_table_cell_clicked", "compare_table_rows_all", "compare_table_rows_current", "compare_table_rows_selected", "compare_table_search", "compare_table_state"))
 }
 
@@ -94,7 +94,7 @@ ui <- function(request) {
               br(),
               tags$div(class = "header", checked = NA,
                        tags$p("Tabel on tehtud EMTA väljastatud kvartaalsete andmete pealt. Kasutatakse septembri, oktoobri, novembri 2017. a andmeid, mis asuvad",
-                              tags$a(href = "http://www.emta.ee/et/kontaktid-ja-ametist/maksulaekumine-statistika/tasutud-maksud-kaive-ja-tootajate-arv", "siin."), "Ettevõtted on sorteeritud tunnuse \"Riiklikud  maksud\" järgi."),
+                              tags$a(href = "http://www.emta.ee/et/kontaktid-ja-ametist/maksulaekumine-statistika/tasutud-maksud-kaive-ja-tootajate-arv", "siin.", target="_blank"), "Ettevõtted on sorteeritud tunnuse \"Riiklikud  maksud\" järgi."),
                        tags$p("*Deklareeritud käibena avaldatakse käibedeklaratsioonide ridade 1, 2 ja 3 summa."),
                        tags$p("**Töötajate arv on möödunud kvartali viimase kuupäeva seisuga töötamise registrisse kantud kehtiva kandega tööd tegevate isikute arv, tööjõumaksud on kvartali jooksul kassapõhiselt tasutud summa. Seega ei ole töötajate arv ja tööjõumaksud kvartalis üks ühele võrreldavad.")
               ))
@@ -102,4 +102,3 @@ ui <- function(request) {
 }
 
 shinyApp(ui = ui, server = server, enableBookmarking = "url")
-
