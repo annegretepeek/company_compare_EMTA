@@ -4,15 +4,32 @@ library(dplyr)
 library(readxl)
 library(magrittr)
 
-dt <- read_excel("tasutud_maksud_05.07.2017.xlsx")
+dt <- read_excel("tasutud_maksud_10.01.2018.xlsx")
+
+parandus <- function(string){
+  string <- gsub("<ff>FFFFC3<ff>FFFF9C", "Ü", string)
+  string <- gsub("<ff>FFFFC3<ff>FFFF95", "Õ", string)
+  string <- gsub("<ff>FFFFC3<ff>FFFF84", "Ä", string)
+  string <- gsub("<ff>FFFFC3<ff>FFFF96", "Ö", string)
+  string <- gsub("<ff>FFFFC5<ff>FFFFA0", "Š", string)
+  string <- gsub("<ff>FFFFC5<ff>FFFFBD", "Ž", string)
+  return(string)
+}
 
 server <- function(input, output, session)  {
-  updateSelectizeInput(session, "Firma1",
-                       choices = as.vector(dt$Nimi), server = TRUE)
-  updateSelectizeInput(session, "Firma2",
-                       choices = as.vector(dt$Nimi), server = TRUE)
-  updateSelectizeInput(session, "Firma3",
-                       choices = as.vector(dt$Nimi), server = TRUE)
+  updateSelectizeInput(session, "Firma1", choices = dt$Nimi, server = TRUE)
+  updateSelectizeInput(session, "Firma2", choices = dt$Nimi, server = TRUE)
+  updateSelectizeInput(session, "Firma3", choices = dt$Nimi, server = TRUE)
+  
+  onRestored(function(url) {
+    firma1 <- parandus(url$input$Firma1)
+    firma2 <- parandus(url$input$Firma2)
+    firma3 <- parandus(url$input$Firma3)
+    
+    updateSelectizeInput(session, "Firma1", selected = firma1, choices = dt$Nimi, server = TRUE)
+    updateSelectizeInput(session, "Firma2", selected = firma2, choices = dt$Nimi, server = TRUE)
+    updateSelectizeInput(session, "Firma3", selected = firma3, choices = dt$Nimi, server = TRUE)
+  })
   
   empty_row <- data.frame(matrix(nrow = 1, ncol = ncol(dt)))
   names(empty_row) <- names(dt)
@@ -55,24 +72,32 @@ server <- function(input, output, session)  {
                                              columnDefs = list(list(width = "400px", targets = "_all"))),
                   rownames = FALSE) %>% formatStyle(" ", fontWeight = "bold")
   })
+  
+  setBookmarkExclude(c("compare_table_cell_clicked", "compare_table_rows_all", "compare_table_rows_current", "compare_table_rows_selected", "compare_table_search", "compare_table_state"))
 }
 
-ui <- fluidPage(theme = "bootstrap.css",
-  mainPanel(width = 12,
-    fluidRow(
-      column(3, offset = 3, selectizeInput("Firma1", "", choices = NULL, options = list(placeholder = "Ettevõtte nimi"))),
-      column(3, selectizeInput("Firma2", "", choices = NULL, options = list(placeholder = "Ettevõtte nimi"))),
-      column(3, selectizeInput("Firma3", "", choices = NULL, options = list(placeholder = "Ettevõtte nimi")))
-    ),
-    fluidRow(column(12, DT::dataTableOutput("compare_table")
-    )),
-    tags$div(class = "header", checked = NA,
-             tags$p("Tabel on tehtud EMTA väljastatud kvartaalsete andmete pealt. Kasutatakse märts, aprill, mai 2017. a andmeid, mis asuvad",
-             tags$a(href = "http://www.emta.ee/et/kontaktid-ja-ametist/maksulaekumine-statistika/tasutud-maksud-kaive-ja-tootajate-arv", "siin.")),
-             tags$p("*Deklareeritud käibena avaldatakse käibedeklaratsioonide ridade 1, 2 ja 3 summa."),
-             tags$p("**Töötajate arv on möödunud kvartali viimase kuupäeva seisuga töötamise registrisse kantud kehtiva kandega tööd tegevate isikute arv, tööjõumaksud on kvartali jooksul kassapõhiselt tasutud summa. Seega ei ole töötajate arv ja tööjõumaksud kvartalis üks ühele võrreldavad.")
-    ))
-)
+ui <- function(request) {
+  fluidPage(
+    mainPanel(width = 12,
+              fluidRow(
+                column(3, offset = 3, selectizeInput("Firma1", "", choices = NULL, options = list(placeholder = "Trüki või vali ettevõtte nimi"))),
+                column(3, selectizeInput("Firma2", "", choices = NULL, options = list(placeholder = "Trüki või vali ettevõtte nimi"))),
+                column(3, selectizeInput("Firma3", "", choices = NULL, options = list(placeholder = "Trüki või vali ettevõtte nimi")))
+              ),
+              fluidRow(column(12, DT::dataTableOutput("compare_table")
+              )),
+              br(),
+              bookmarkButton(label = "Link jagamiseks", title = "Salvesta see vaade ja saa jagamiseks vaate URL."),
+              br(),
+              br(),
+              tags$div(class = "header", checked = NA,
+                       tags$p("Tabel on tehtud EMTA väljastatud kvartaalsete andmete pealt. Kasutatakse septembri, oktoobri, novembri 2017. a andmeid, mis asuvad",
+                              tags$a(href = "http://www.emta.ee/et/kontaktid-ja-ametist/maksulaekumine-statistika/tasutud-maksud-kaive-ja-tootajate-arv", "siin."), "Ettevõtted on sorteeritud tunnuse \"Riiklikud  maksud\" järgi."),
+                       tags$p("*Deklareeritud käibena avaldatakse käibedeklaratsioonide ridade 1, 2 ja 3 summa."),
+                       tags$p("**Töötajate arv on möödunud kvartali viimase kuupäeva seisuga töötamise registrisse kantud kehtiva kandega tööd tegevate isikute arv, tööjõumaksud on kvartali jooksul kassapõhiselt tasutud summa. Seega ei ole töötajate arv ja tööjõumaksud kvartalis üks ühele võrreldavad.")
+              ))
+  )
+}
 
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, enableBookmarking = "url")
 
