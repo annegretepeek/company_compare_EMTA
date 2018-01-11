@@ -80,6 +80,7 @@ server <- function(input, output, session)  {
 
 ui <- function(request) {
   fluidPage(
+    tags$title("Ettevõtete võrdlus - Annegrete Peek"),
     mainPanel(width = 12,
               fluidRow(
                 column(3, offset = 3, selectizeInput("Firma1", "", choices = NULL, options = list(placeholder = "Trüki või vali ettevõtte nimi"))),
